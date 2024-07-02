@@ -2,23 +2,34 @@ const express = require('express');
 const mongodb = require('./database/monge');
 const bodyParser = require('body-parser');
 const env = require("dotenv").config()
-const expressLayouts = require('express-ejs-layouts');
 const usersController = require('./controllers/usersController');
-
+const swaggerAutogen = require('swagger-autogen')();
+const router = require('express').Router();
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 
 const app = express();
-/* ***********************
- * View Engine
- *************************/
-app.set("view engine", "ejs")
-app.use(expressLayouts)
-app.set("layout", "./layouts/layout") 
-
-
-
 // Parse JSON bodies
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'Origin, x-Requested-With, Content-Type, Accept, z-Key'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  next();
+});
+
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+      console.error('Bad JSON:', err.message);
+      return res.status(400).json({ error: 'Invalid JSON format' });
+  }
+  next();
+});
 
 
 
@@ -35,6 +46,6 @@ mongodb.initDb((err) => {
   }
   else {
     app.listen(process.env.PORT || port);
-    console.log('Web Server is listening at port ' + (process.env.PORT || 3000));
+    console.log('Web Server is listening at port ' + (process.env.PORT || 3001));
   }
 });
