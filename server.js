@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const env = require("dotenv").config()
 const usersController = require('./controllers/usersController');
 const swaggerAutogen = require('swagger-autogen')();
+const cors = require('cors');
 const router = require('express').Router();
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
@@ -12,6 +13,12 @@ const swaggerDocument = require('./swagger.json');
 const app = express();
 // Parse JSON bodies
 app.use(bodyParser.json());
+
+app
+  .use(cors())
+  .use(express.json())
+  .use(express.urlencoded({ extended: true }))
+
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
